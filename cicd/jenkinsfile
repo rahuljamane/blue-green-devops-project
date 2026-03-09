@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/rahuljamane/blue-green-devops-project.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t bluegreen-app:v1 -f docker/Dockerfile .'
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh 'docker tag bluegreen-app:v1 https://github.com/rahuljamane/blue-green-devops-project.git/bluegreen-app:v1'
+                sh 'docker push https://github.com/rahuljamane/blue-green-devops-project.git/bluegreen-app:v1'
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f kubernetes/'
+            }
+        }
+    }
+}
